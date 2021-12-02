@@ -50,5 +50,6 @@ const Auth = async (userToken, sessionToken) => {
     }
 
 }
+const file = ["shortText", "longText", "media", "radioButton", "check"];
 
-module.exports = { unixMS, numRand, stringRand, makeToken, Auth }
+module.exports = { unixMS, numRand, stringRand, makeToken, Auth, file }

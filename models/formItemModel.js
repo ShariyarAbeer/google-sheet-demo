@@ -1,19 +1,29 @@
 const mongoose = require('mongoose');
 
 
-const formSchema = mongoose.Schema({
+const formItemSchema = mongoose.Schema({
     'token': {
         type: String
     },
     'formToken': {
         type: String
     },
+    'stepsToken': {
+        type: String
+    },
+    'image': {
+        type: String
+    },
     'title': {
         type: String
     },
-    'details': {
+    'inputType': {
         type: String
     },
+    'require': {
+        type: Number
+    },
+
     'status': {
         type: String
     },
@@ -32,4 +42,4 @@ const formSchema = mongoose.Schema({
 })
 
 
-module.exports = mongoose.model('formSchema', formSchema);
+module.exports = mongoose.model('formItemSchema', formItemSchema);

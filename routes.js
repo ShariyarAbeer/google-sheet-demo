@@ -12,6 +12,7 @@ router.post('/account/logout', UserController.logout);
 
 
 router.post('/form/create', FormController.createForm);
+router.post('/form/steps/new', FormController.fromItemAdd);
 
 
 
