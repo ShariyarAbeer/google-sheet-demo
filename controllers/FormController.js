@@ -139,5 +139,75 @@ module.exports = {
             console.log(error);
         }
 
+    },
+    fromNextStepsAdd: async (req, res) => {
+        try {
+            let formItem = makeToken.makeToken({ label: 'formItem' })
+            const { usertoken, sessiontoken } = req.headers
+            const { formToken, previousStepsToken, title, details, nextStepsToken } = req.body;
+
+            let proceed = true;
+            let userCheck = await UserModel.find({ userToken: usertoken });
+            let formInfo = await FormStepsSchema.find({ formToken: formToken });
+            // console.log(userCheck);
+            if (userCheck.length == 0) {
+                proceed = false;
+                res.send({
+                    type: "Error",
+                    data: {
+                        msg: "User already in database"
+                    }
+                })
+
+            }
+            if (formInfo[0].createBy != usertoken || formInfo[0].formToken != formToken || formInfo[0].previousStepsToken != "") {
+                proceed = false;
+                res.send({
+                    type: "Error",
+                    data: {
+                        msg: "This Form si not in database or this page have"
+                    }
+                })
+            }
+            if (proceed) {
+                let formNextStepsToken = makeToken.makeToken({ label: 'formNextStepsToken' })
+                let formItemElement = await FormStepsSchema.create({
+                    token: formNextStepsToken,
+                    formToken: formToken,
+                    title: title,
+                    details: details,
+                    previousStepsToken: previousStepsToken,
+                    nextStepsToken: nextStepsToken,
+                    status: "Active",
+                    existence: 1,
+                    createBy: usertoken,
+                    sessionToken: sessiontoken
+                })
+                let updatePreviousFormToken = await FormStepsSchema.findOneAndUpdate(
+                    { 'sessionToken': sessiontoken },
+                    {
+                        '$set': {
+                            nextStepsToken: formNextStepsToken
+                        }
+                    },
+                    { new: true }
+                );
+                res.send({
+                    type: "Form steps 2 Created",
+                    data: {
+                        msg: formItemElement
+                    }
+                })
+            }
+
+        } catch (error) {
+
+            res.send({
+                type: "Catch Error",
+                data: error
+            })
+            console.log(error);
+        }
+
     }
 }
