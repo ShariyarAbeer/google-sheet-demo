@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 
-const formItemSchema = mongoose.Schema({
+const itemOptionsModel = mongoose.Schema({
     'token': {
         type: String
     },
@@ -11,20 +11,17 @@ const formItemSchema = mongoose.Schema({
     'stepsToken': {
         type: String
     },
-    'image': {
+    'itemToken': {
+        type: String
+    },
+    'itemType': {
         type: String
     },
     'title': {
         type: String
     },
-    'inputType': {
+    'titleType': {
         type: String
-    },
-    'require': {
-        type: Number
-    },
-    'positionKey': {
-        type: Number
     },
 
     'status': {
@@ -45,4 +42,4 @@ const formItemSchema = mongoose.Schema({
 })
 
 
-module.exports = mongoose.model('formItemSchema', formItemSchema);
+module.exports = mongoose.model('itemOptionsModel', itemOptionsModel);
