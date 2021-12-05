@@ -5,7 +5,6 @@ const FormStepsSchema = require('../Models/formStepsModel');
 const FormItemSchema = require('../Models/formItemModel');
 const makeToken = require('../helpers/utls');
 const ItemOptionsModel = require('../models/itemOptionsModel');
-const FormItemModel = require('../Models/formItemModel');
 
 module.exports = {
     createForm: async (req, res) => {
@@ -148,7 +147,7 @@ module.exports = {
         try {
             let formItem = makeToken.makeToken({ label: 'formItem' })
             const { usertoken, sessiontoken } = req.headers
-            const { formToken, previousStepsToken, title, details, nextStepsToken } = req.body;
+            const { formToken, previousStepsToken, title, details } = req.body;
 
             let proceed = true;
             let userCheck = await UserModel.find({ userToken: usertoken });
@@ -175,6 +174,7 @@ module.exports = {
             }
             if (proceed) {
                 let formNextStepsToken = makeToken.makeToken({ label: 'formNextStepsToken' })
+                let nextStepsToken = makeToken.makeToken({ label: 'nextStepsToken' })
                 let formItemElement = await FormStepsSchema.create({
                     token: formNextStepsToken,
                     formToken: formToken,
@@ -222,8 +222,8 @@ module.exports = {
 
             let proceed = true;
             let userCheck = await UserModel.find({ userToken: usertoken });
-            let formInfo = await FormItemSchema.find({ formToken: formToken });
-            // console.log(userCheck);
+            let formInfo = await FormItemSchema.find({ token: itemToken });
+            console.log(formInfo);
             if (userCheck.length == 0) {
                 proceed = false;
                 res.send({
@@ -290,7 +290,7 @@ module.exports = {
             // }
             if (proceed) {
 
-                let itemOptionToken = makeToken.makeToken({ label: 'formNextStepsToken' });
+                let itemOptionToken = makeToken.makeToken({ label: 'itemOptionToken' });
                 let formItemElement;
                 for (let i = 0; i < data1.length; i++) {
 
@@ -313,6 +313,143 @@ module.exports = {
                     data: {
                         msg: formItemElement
                     }
+                })
+            }
+
+        } catch (error) {
+
+            res.send({
+                type: "Catch Error",
+                data: error
+            })
+            console.log(error);
+        }
+
+    },
+    itemPositionkeyUpdate: async (req, res) => {
+        try {
+            let formItem = makeToken.makeToken({ label: 'formItem' })
+            const { usertoken, sessiontoken } = req.headers
+            const { formToken, stepsToken, itemToken, positionKey, data1 } = req.body;
+
+            let proceed = true;
+            let userCheck = await UserModel.find({ userToken: usertoken });
+            let formInfo = await FormItemSchema.find({ formToken: formToken });
+            // console.log(userCheck);
+            if (userCheck.length == 0) {
+                proceed = false;
+                res.send({
+                    type: "Error",
+                    data: {
+                        msg: "User already in database"
+                    }
+                })
+
+            }
+            // if (formInfo[0].createBy != usertoken || formInfo[0].formToken != formToken || formInfo[0].stepsToken != stepsToken || formInfo[0].token != itemToken) {
+            //     proceed = false;
+            //     res.send({
+            //         type: "Error",
+            //         data: {
+            //             msg: "This Form si not in database or this page have"
+            //         }
+            //     })
+            // }
+            // if (makeToken.file.includes(itemType) === false) {
+            //     proceed = false;
+            //     res.send({
+            //         type: "Error inputType",
+            //         data: {
+            //             msg: "itemType thik kor sala 1"
+            //         }
+            //     })
+            // }
+            // let orderList = []
+            // for (let i = 0; i < data1.length; i++) {
+            //     if (data1[i].titleType === 'other') {
+            //         orderList.push(i)
+            //     }
+            // }
+            // console.log(orderList);
+
+            // if (data.length) {
+            //     proceed = false;
+            //     // res.send({
+            //     //     type: "Error inputType",
+            //     //     data: {
+            //     //         msg: "itemType thik kor sala"
+            //     //     }
+            //     // })
+            // }
+            if (proceed) {
+
+
+                let updatePositionKey;
+                for (let i = 0; i < data1.length; i++) {
+
+                    updatePositionKey = await FormItemSchema.findOneAndUpdate(
+                        { 'token': data1[i].itemToken },
+                        {
+                            '$set': {
+                                positionKey: data1[i].positionKey
+                            }
+                        },
+                        { new: true }
+                    );
+                }
+                res.send({
+                    type: "Form steps 2 Created",
+                    data: {
+                        msg: updatePositionKey
+                    }
+                })
+            }
+
+        } catch (error) {
+
+            res.send({
+                type: "Catch Error",
+                data: error
+            })
+            console.log(error);
+        }
+
+    },
+    getForm: async (req, res) => {
+        try {
+            const { usertoken } = req.headers
+            const { formToken, stepsToken } = req.params
+
+            let proceed = true;
+
+            // let formInfo = await FormStepsSchema.find({ stepsToken: stepsToken });
+            // let formOptionInfo = await ItemOptionsModel.find({ itemToken: formInfo[0].stepsToken });
+            let fullFormInfo = await FormItemSchema.find({ formToken: formToken, stepsToken: stepsToken });
+            let listOfItems = [];
+            console.log(fullFormInfo.length);
+
+            for (let i = 0; i < fullFormInfo.length; i++) {
+                let formOptionInfo = [];
+                let currItem = fullFormInfo[i].toJSON();
+                if (fullFormInfo[i].inputType == "radioButton" || fullFormInfo[i].inputType == "check") {
+                    formOptionInfo = await ItemOptionsModel.find({ itemToken: fullFormInfo[i].token });
+                    // console.log(formOptionInfo)
+
+                }
+                currItem.options = formOptionInfo;
+                listOfItems.push(currItem);
+
+            }
+
+
+            if (proceed) {
+                res.send({
+                    type: "Success",
+                    data: {
+                        count: listOfItems.length,
+                        items: listOfItems,
+                    }
+
                 })
             }
 

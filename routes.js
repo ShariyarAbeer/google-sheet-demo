@@ -19,4 +19,5 @@ router.post('/form/item/positionkey/update', FormController.itemPositionkeyUpdat
 
 
 
+router.get('/get/form/:formToken/:stepsToken', FormController.getForm);
 module.exports = router;
